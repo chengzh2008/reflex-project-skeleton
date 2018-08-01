@@ -33,6 +33,8 @@ cycles:
 
 ```bash
 $ ./cabal new-repl frontend
+# or 
+$ ghcid -c "cd ..; ./cabal new-repl frontend" -T Main.main --restart=frontend.cabal
 ```
 
 `nix-build`
