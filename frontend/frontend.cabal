@@ -22,5 +22,7 @@ executable frontend
                      , common
                      , reflex-dom
                      , jsaddle-warp
+                     , process
+                     , exceptions
   hs-source-dirs:      src
   default-language:    Haskell2010

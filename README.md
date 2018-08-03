@@ -36,6 +36,12 @@ $ ./cabal new-repl frontend
 # or 
 $ ghcid -c "cd ..; ./cabal new-repl frontend" -T Main.main --restart=frontend.cabal
 ```
+To start hoogle locally, run
+```
+nix-shell -A shels.ghc
+hoogle server --local
+```
+
 
 `nix-build`
 ---
