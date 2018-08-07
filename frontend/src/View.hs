@@ -14,9 +14,34 @@ import           Reflex.Dom.Core
 myApp :: (forall x. Widget x ())
 myApp = do
   simpleElements
+  sp
   exDynAttr
+  sp
   exFoldDyn
+  sp
   exFoldDynWith2Button
+  sp
+  exFoldDayWithApplication
+  sp
+  exTextInput
+  sp
+  exTextInput2
+  sp
+  exTextInputWhenEvent
+  sp
+  exTextInputWhenPress
+  sp
+  exTextInputSetValue
+  sp
+  exTextInputResetButton
+  sp
+  exRGBColorViewer
+  sp
+  exCheckbox
+
+sp :: MonadWidget t m => m ()
+sp =
+  el "h4" $ text "--------------------------------------------------------"
 
 simpleElements :: (forall x. Widget x ())
 simpleElements = do
@@ -77,3 +102,135 @@ exFoldDynWith2Button = do
     evDecr <- button "Decrement"
     el "span" $ display countsMerge
   return ()
+
+exFoldDayWithApplication :: MonadWidget t m => m ()
+exFoldDayWithApplication = do
+  el "h3" $ text "Using foldDyn with function application"
+  rec
+    dynNum <- foldDyn ($) (0 :: Int) $ leftmost [(+ 1) <$ evIncr, (+ (-1)) <$ evDecr, const 0 <$ evReset]
+    el "div" $ display dynNum
+    evIncr <- button "Increment"
+    evDecr <- button "Decrement"
+    evReset <- button "Reset"
+  return ()
+
+exTextInput :: MonadWidget t m => m ()
+exTextInput = do
+  el "h3" $ text "Text input example"
+  el "div" $ do
+    el "h2" $ text "Simple Text Input"
+    ti <- textInput $ def & textInputConfig_initialValue .~ "initial"
+    dynText $ value ti
+
+exTextInput2 :: MonadWidget t m => m ()
+exTextInput2 = do
+  el "h3" $ text "Text Input - Configuration"
+
+  el "h4" $ text "Max Length 14"
+  t1 <- textInput $ def & attributes .~ constDyn ("maxlength" =: "14")
+  dynText $ _textInput_value t1
+
+  el "h4" $ text "Initial Value"
+  t2 <- textInput $ def & textInputConfig_initialValue .~ "input"
+  dynText $ _textInput_value t2
+
+  el "h4" $ text "Input Hint"
+  t3 <- textInput $
+        def & attributes .~ constDyn("placeholder" =: "type something")
+  dynText $ _textInput_value t3
+
+  el "h4" $ text "Password"
+  t4 <- textInput $ def & textInputConfig_inputType .~ "password"
+  dynText $ _textInput_value t4
+
+  el "h4" $ text "Multiple Attributes: Hint + Max Length"
+  t5 <- textInput $  def & attributes .~ constDyn ("placeholder" =: "Max 6 chars" <> "maxlength" =: "6")
+  dynText $ _textInput_value t5
+
+  el "h4" $ text "Numeric Field with initial value"
+  t6 <- textInput $ def & textInputConfig_inputType .~ "number"
+                        & textInputConfig_initialValue .~ "0"
+  dynText $ _textInput_value t6
+
+  el "h4" $ text "Check box"
+  t7 <- textInput $ def & textInputConfig_inputType .~ "checkbox"
+  dynText $ _textInput_value t7
+
+exTextInputWhenEvent :: MonadWidget t m => m ()
+exTextInputWhenEvent = do
+  el "h3" $ text "Text Input - Read Value on Button Click"
+  ti <- textInput def
+  evClick <- button "Click Me"
+  el "br" blank
+  text "Contents of TextInput on last click: "
+  let evText = tagPromptlyDyn (value ti) evClick
+  dynText =<< holdDyn "" evText
+
+exTextInputWhenPress :: MonadWidget t m => m ()
+exTextInputWhenPress = do
+  el "h3" $ text "Text Input - Read Value on 'Enter'"
+  ti <- textInput def
+  el "br" blank
+  text "Contents of TextInput after 'Enter': "
+  let evEnter = keypress Enter ti
+  let evText = tagPromptlyDyn (value ti) evEnter
+  dynText =<< holdDyn "" evText
+
+exTextInputSetValue :: MonadWidget t m => m ()
+exTextInputSetValue = do
+  el "h3" $ text "Write into TextInput Widget"
+  t1 <- textInput def
+  evCopy <- button ">>>"
+  let evText = tagPromptlyDyn (value t1) evCopy
+  _ <- textInput $ def & setValue .~ evText
+  return ()
+
+exTextInputResetButton :: MonadWidget t m => m ()
+exTextInputResetButton = do
+  rec
+    el "h1" $ text "Clear TextInput Widget"
+    _ <- textInput $ def & setValue .~ ("" <$ evReset)
+    evReset <- button "Reset"
+  return ()
+
+exRGBColorViewer :: MonadWidget t m => m ()
+exRGBColorViewer = do
+  el "h2" $ text "RGB Viewer"
+  el "div" $ text "Enter RGB component values as numbers between 0 and 255"
+  dfsRed <- labledBox "Red: "
+  dfsGreen <- labledBox "Green: "
+  dfsBlue <- labledBox "Blue: "
+  _ <-
+    textArea $
+    def & attributes .~
+    (styleMap <$> value dfsRed <*> value dfsGreen <*> value dfsBlue)
+  return ()
+
+labledBox :: MonadWidget t m => T.Text -> m (TextInput t)
+labledBox lbl =
+  el "div" $ do
+    text lbl
+    textInput $
+      def & textInputConfig_inputType .~ "number" & textInputConfig_initialValue .~
+      "0"
+
+styleMap :: T.Text -> T.Text -> T.Text -> Map.Map T.Text T.Text
+styleMap r g b =
+  "style" =: mconcat ["background-color: rgb(", r, ", ", g, ", ", b, ")"]
+
+
+exCheckbox :: MonadWidget t m => m ()
+exCheckbox = do
+  el "div" $ do
+    el "h3" $ text "Checkbox (Out of the box)"
+    cb <- el "label" $ do
+      text "Click me"
+      cb1 <- checkbox True def
+      return cb1
+    el "p" blank
+    let dynState = checkedState <$> value cb
+    dynText dynState
+
+checkedState :: Bool -> T.Text
+checkedState True = "Checkbox is checked"
+checkedState _    = "Checkbox is not checked"
