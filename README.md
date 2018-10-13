@@ -34,7 +34,11 @@ cycles:
 ```bash
 $ ./cabal new-repl frontend
 # or 
+# Live reloading
+
+# start this script inside the frontend directory
 $ ghcid -c "cd ..; ./cabal new-repl frontend" -T Main.main --restart=frontend.cabal
+# then check `localhost:3911` to see the page
 ```
 To start hoogle locally, run
 ```
