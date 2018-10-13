@@ -13,6 +13,7 @@ import           Reflex.Dom.Core
 
 myApp :: (forall x. Widget x ())
 myApp = do
+  sp
   simpleElements
   sp
   exDynAttr

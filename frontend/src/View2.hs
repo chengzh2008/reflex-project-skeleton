@@ -14,7 +14,7 @@ import Data.Monoid
 import Data.Maybe (fromJust, fromMaybe)
 import Data.Time
 
-myApp2 :: (forall x. Widget x ())
+myApp2 :: MonadWidget t m => m ()
 myApp2 = do
   exDropdown
   sp
